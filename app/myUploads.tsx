@@ -1,9 +1,8 @@
 import Polaroid from "@/components/polaroid";
-import { Stack, useRouter } from "expo-router";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { Stack } from "expo-router";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import Swiper from "react-native-deck-swiper";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { auth, db } from "../firebaseConfig";
 import { globalStyles } from "./globalStyles";
 
@@ -20,17 +19,29 @@ interface PolaroidItem {
 export default function MyUploads() {
   const [uploads, setUploads] = useState<PolaroidItem[]>([]); //array filled with polaroidItems
   const swiperRef = useRef<any>(null);
-  const router = useRouter();
+  const [username, setUsername] = useState("username");
 
+  const loadUser = async () => {
+      const user = auth.currentUser;
+      if(!user) return;
+
+      const docRef = doc(db, "users", user.uid); // getting the document of the user based on userId
+      const snap = await getDoc(docRef);
+
+      if(snap.exists()) {
+        setUsername(snap.data().username); // storing username into username array
+      }
+
+    };
   useEffect(() => {
+    loadUser();
     const loadUploads = async () => {
-      if (!auth.currentUser) return;
+      if (!auth.currentUser) return; //authorized user checking in case of reloading etc
 
       const q = query(
         collection(db, "polaroids"),
         where("ownerId", "==", auth.currentUser.uid) //gets the polaroids under user's id
       );
-
       const snap = await getDocs(q);
       const data = snap.docs.map((doc) => ({
         id: doc.id,
@@ -62,40 +73,44 @@ export default function MyUploads() {
             fontSize: 22,
             fontWeight: "600",
           },
-          headerStyle: {
-            
-          },
           headerTitleAlign:"center",
           headerShown: true,
         }}
       />
-        <View style={globalStyles.swiperContainer}>
-            <Swiper
-            ref ={swiperRef}
-            cards={uploads}
-            renderCard={(card) =>
-                card ? (
-                    <View style={globalStyles.cardWrapper}>
-                        <Polaroid
-                        image={{ uri: card.imageUrl}}
-                        name={card.actor}
-                        desc={`${card.title}\n${card.description}`}
-                        filter={card.filter}
-                        />
-                    </View>
-                ) : null 
-            }
-            backgroundColor="#f8f8f8"
-            animateCardOpacity
-            verticalSwipe={false}
-            />
-        </View>
-
+        <FlatList
+        data={uploads}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.gridItem}>
+          <View style={styles.scaleWrapper}>
+            <Polaroid
+              image={{uri: item.imageUrl}}
+              name={item.actor}
+              desc={`${item.title}\n${item.description}`}
+              filter={item.filter}
+              watermarkName={username}
+              />  
+          </View>
+          </View>
+        )}
+        />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  row: {
+    justifyContent: "space-between",
+  },
+  scaleWrapper: {
+    transform: [{scale: 0.55}],
+  },
+  gridItem: {
+    width: "50%",
+    alignItems: "center"
+  },
   container: {
     padding: 16,
     backgroundColor: "#fff",
@@ -105,24 +120,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  empty: {
-    textAlign: "center",
-    color: "#777",
-    marginTop: 20,
-  },
   card: {
     marginBottom: 20,
     borderRadius: 12,
     backgroundColor: "#f8f8f8",
     padding: 10,
   },
-  image: {
-    width: "100%",
-    height: 220,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  title: { fontWeight: "600", fontSize: 16 },
-  actor: { color: "#555", marginBottom: 4 },
-  desc: { color: "#666", fontSize: 14 },
 });

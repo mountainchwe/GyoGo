@@ -6,6 +6,7 @@ import { auth } from "../../firebaseConfig";
 export default function Profile() {
   const router = useRouter();
 
+  //logoutButton function
   const handleLogout = async () => {
     await signOut(auth); //logs user out completely
     router.replace("/login");
@@ -13,26 +14,24 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      {/* Section title (optional) */}
-      {/* <Text style={styles.sectionTitle}>Profile</Text> */}
 
       <TouchableOpacity style={styles.row} onPress={() => router.push("/myUploads")}>
         <Text style={styles.rowText}>My Polaroids</Text>
       </TouchableOpacity>
       <View style={styles.divider} />
 
-      <TouchableOpacity style={styles.row}>
+      <TouchableOpacity style={styles.row} onPress={() => router.push("/myLikes")}>
         <Text style={styles.rowText}>My Likes</Text>
       </TouchableOpacity>
       <View style={styles.divider} />
 
-      <TouchableOpacity style={styles.row}>
+      <TouchableOpacity style={styles.row} onPress={() => router.push("/myBookmarks")}>
         <Text style={styles.rowText}>My Bookmarks</Text>
       </TouchableOpacity>
       <View style={styles.divider} />
 
-      <TouchableOpacity style={styles.row}>
-        <Text style={styles.rowText}>Edit Profile</Text>
+      <TouchableOpacity style={styles.row} onPress={() => router.push("/myRejects")}>
+        <Text style={styles.rowText}>Rejected Polaroids</Text>
       </TouchableOpacity>
       <View style={styles.divider} />
 
@@ -48,7 +47,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 40,
   },
 
   row: {

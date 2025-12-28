@@ -2,7 +2,7 @@ import { BlurView } from "expo-blur";
 import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection } from "firebase/firestore";
 import React, { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../firebaseConfig";
 import { globalStyles } from "./globalStyles";
 
@@ -69,8 +69,21 @@ export default function AddPolaroid() {
 
 			{/* BLUR FILTER */}
 			{filter === "blur" && (
-			  <BlurView intensity={50} tint="light" style={globalStyles.blurOverlay}/>
-			)}
+					  <View style={globalStyles.overlayContainer} pointerEvents="none">
+						<BlurView
+						  intensity={Platform.OS === "web" ? 40 : 100}
+						  tint="light"
+						  style={globalStyles.blurOverlay}
+						/>
+						{/* Extra blur overlays for mobile version */}
+						{Platform.OS !== "web" && (
+						<>
+						  <View style={globalStyles.fogOverlay} />
+						  <View style={globalStyles.frostedFogOverlay} />
+						</>
+					  )}
+					  </View>
+					)}
 
 			{/* WATERMARK FILTER */}
 			{filter === "watermark" && (

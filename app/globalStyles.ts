@@ -20,11 +20,12 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
   },
   buttonRow: {
+    position: "absolute",   // ← REQUIRED
     flexDirection: "row",
     justifyContent: "space-between",
     width: "70%",
-    position: "absolute",
     bottom: 60,
+    zIndex: 50, // ensure above swiper
   },
   circleBtn: {
     width: 60,
@@ -106,11 +107,20 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: "rgba(113, 111, 111, 0.2)",
     zIndex: 2,
   },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
   fogOverlay: {
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: "rgba(255,255,255,0.35)",  // more opaque fog
-  zIndex: 3,
-  // backgroundColor: "rgba(245,245,245,0.4)",
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(231, 231, 231, 0.35)",
+  },
+
+  frostedFogOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
   },
 
   watermarkContainer: {

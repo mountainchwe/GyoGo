@@ -1,14 +1,15 @@
 import { BlurView } from "expo-blur";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Platform, StyleSheet, Text, View } from "react-native";
 
 type PolaroidProps = {
   image: { uri: string };
   name: string;
   desc: string;
   filter?: "none" | "blur" | "watermark";
+  watermarkName?: string;
 };
 
-export default function Polaroid({ image, name, desc, filter }: PolaroidProps) {
+export default function Polaroid({ image, name, desc, filter, watermarkName }: PolaroidProps) {
   return (
     <View style={styles.polaroidContainer}>
       {/* IMAGE AREA (frame) */}
@@ -17,23 +18,28 @@ export default function Polaroid({ image, name, desc, filter }: PolaroidProps) {
 
         {/* BLUR FILTER */}
         {filter === "blur" && (
-          <View style={styles.overlayContainer}>
+          <View style={styles.overlayContainer} pointerEvents="none">
             <BlurView
-              intensity={100}
+              intensity={Platform.OS === "web" ? 40 : 100}
               tint="light"
               style={styles.blurOverlay}
             />
-            <View style={styles.fogOverlay} />
-            <View style={styles.frostedFogOverlay}/>
+            {/* Extra blur overlays for mobile version */}
+            {Platform.OS !== "web" && (
+            <>
+              <View style={styles.fogOverlay} />
+              <View style={styles.frostedFogOverlay} />
+            </>
+          )}
           </View>
         )}
 
         {/* WATERMARK FILTER */}
         {filter === "watermark" && (
-          <View style={styles.watermarkOverlay}>
+          <View style={styles.watermarkOverlay} pointerEvents="none">
             {Array.from({ length: 160 }).map((_, i) => (
               <Text key={i} style={styles.watermarkText}>
-                username
+                {watermarkName ?? "username"}
               </Text>
             ))}
           </View>
@@ -52,13 +58,14 @@ export default function Polaroid({ image, name, desc, filter }: PolaroidProps) {
 const styles = StyleSheet.create({
   polaroidContainer: {
     width: 250,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffffff",
     borderRadius: 12,
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 4,
+    pointerEvents: "box-none",
   },
 
   frame: {
@@ -114,15 +121,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.4)",
   },
-
-  pixelatedImage: {
-  width: "100%",
-  height: "100%",
-  resizeMode: "cover",
-  transform: [
-    { scale: 1 },
-  ],
-},
 
   /* --- WATERMARK OVERLAY --- */
   watermarkOverlay: {
